@@ -15,7 +15,6 @@ A smart, cross-platform Python utility designed to seamlessly back up, restore, 
 ---
 
 ## Directory Structure Example
-    ```bash
     /Selected_Destination_Path/
     └── /Your_Username/                         <-- 1. Auto-generated profile folder
         ├── backup_report_20260219_105933.txt   <-- 2. Live text log
