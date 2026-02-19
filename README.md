@@ -15,21 +15,22 @@ A smart, cross-platform Python utility designed to seamlessly back up, restore, 
 ---
 
 ## Directory Structure Example
-/Selected_Destination_Path/
-└── /Your_Username/                         <-- 1. Auto-generated profile folder
-    ├── backup_report_20260219_105933.txt   <-- 2. Live text log
-    ├── Desktop/                            <-- 3. Category folders
-    │   └── current_project.docx
-    ├── Documents/
-    │   ├── Finances/                       <-- 4. Inner contents preserved
-    │   │   └── taxes_2025.xlsx
-    │   └── resume.pdf
-    ├── Downloads/
-    ├── Music/
-    ├── Pictures/
-    ├── Videos/                             <-- 5. OS-standardized (e.g., macOS 'Movies')
-    │   └── home_video.mp4
-    └── user/                               <-- 6. Loose files from your home folder
+    ```bash
+    /Selected_Destination_Path/
+    └── /Your_Username/                         <-- 1. Auto-generated profile folder
+        ├── backup_report_20260219_105933.txt   <-- 2. Live text log
+        ├── Desktop/                            <-- 3. Category folders
+        │   └── current_project.docx
+        ├── Documents/
+        │   ├── Finances/                       <-- 4. Inner contents preserved
+        │   │   └── taxes_2025.xlsx
+        │   └── resume.pdf
+        ├── Downloads/
+        ├── Music/
+        ├── Pictures/
+        ├── Videos/                             <-- 5. OS-standardized (e.g., macOS 'Movies')
+        │   └── home_video.mp4
+        └── user/                               <-- 6. Loose files from your home folder
 
 
 ## 🚀 Installation
