@@ -46,7 +46,7 @@ def get_dir_size(directory):
                     try:
                         total_size += fp.stat().st_size
                     except OSError:
-                        pass
+                        pass # Ignore files that disappear or restrict access during scan
     except OSError:
         pass
     return total_size
@@ -58,23 +58,6 @@ def format_size(size_in_bytes):
             return f"{size_in_bytes:.2f} {unit}"
         size_in_bytes /= 1024.0
     return f"{size_in_bytes:.2f} PB"
-
-def get_unique_filename(filepath):
-    """Generates a unique filename by appending a counter if the file exists."""
-    if not filepath.exists():
-        return filepath
-        
-    directory = filepath.parent
-    stem = filepath.stem
-    suffix = filepath.suffix
-    
-    counter = 1
-    while True:
-        # Reconstruct the name with the counter before the extension
-        new_path = directory / f"{stem}_{counter}{suffix}"
-        if not new_path.exists():
-            return new_path
-        counter += 1
 
 def copy_with_progress(src_dir, dst_dir, desc="Copying", rename_on_collision=False):
     """Copies files recursively while updating a progress bar."""
@@ -100,14 +83,35 @@ def copy_with_progress(src_dir, dst_dir, desc="Copying", rename_on_collision=Fal
                 
                 try:
                     if rename_on_collision:
-                        # Restore logic: Never overwrite, rename if a collision occurs
-                        if dst_file.exists():
-                            dst_file = get_unique_filename(dst_file)
+                        # Smart Resume Check: Look for a match among original AND renamed files
+                        current_check = dst_file
+                        counter = 1
+                        already_restored = False
+                        
+                        while current_check.exists():
+                            # If exact match in size and time, it's already restored
+                            if os.path.getsize(src_file) == os.path.getsize(current_check) and \
+                               os.path.getmtime(src_file) == os.path.getmtime(current_check):
+                                already_restored = True
+                                break
+                            
+                            # Otherwise, check the next numbered filename
+                            current_check = target_dir / f"{dst_file.stem}_{counter}{dst_file.suffix}"
+                            counter += 1
+                            
+                        if already_restored:
+                            pbar.update(1)
+                            continue # Skip copying, move to the next file
+                            
+                        # If no match was found, use the next available unique filename
+                        dst_file = current_check
                         shutil.copy2(src_file, dst_file)
+                        
                     else:
                         # Backup logic: Only copy if new or modified
                         if not dst_file.exists() or os.path.getmtime(src_file) > os.path.getmtime(dst_file):
                             shutil.copy2(src_file, dst_file)
+                            
                 except PermissionError:
                     tqdm.write(f"Permission denied: Skipping {src_file}")
                 except Exception as e:
@@ -131,6 +135,7 @@ def backup(dest_base):
             folder_sizes[cat] = size
             total_backup_size += size
             
+    # Check available disk space
     _, _, free_space = shutil.disk_usage(dest_base)
     
     print(f"Total backup size: {format_size(total_backup_size)}")
@@ -143,6 +148,7 @@ def backup(dest_base):
         
     print("\nSpace check passed. Starting backup...")
     
+    # Setup reporting variables
     current_time = datetime.now()
     timestamp_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
     file_timestamp = current_time.strftime("%Y%m%d_%H%M%S")
@@ -162,7 +168,7 @@ def backup(dest_base):
                 size = folder_sizes[cat]
                 formatted_size = format_size(size)
                 
-                # backup keeps rename_on_collision=False (the default)
+                # Rename is False for backups (default)
                 copy_with_progress(src_path, dest_base / cat, desc=f"Backing up {cat:<10}")
                 report.write(f"{cat:<15} | {formatted_size:<12} | Successfully backed up\n")
             else:
@@ -186,12 +192,12 @@ def restore(src_base):
     for cat, dst_path in paths.items():
         cat_backup_dir = src_base / cat
         if cat_backup_dir.exists():
-            # restore forces rename_on_collision=True
+            # Rename is True for restores to prevent accidental overwrites
             copy_with_progress(cat_backup_dir, dst_path, desc=f"Restoring {cat:<10}", rename_on_collision=True)
     print("\nRestore complete!")
 
 def main():
-    print("=== Cross-Platform Backup & Restore ===")
+    print("=== UniversalTransfer: Cross-Platform Backup & Restore ===")
     print("1. Backup current user files to an external drive")
     print("2. Restore files from an external drive to current user")
     print("3. Exit")
