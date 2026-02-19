@@ -29,24 +29,31 @@ def get_os_paths():
     return paths
 
 def count_files(directory):
-    """Counts total files in a directory for the progress bar."""
+    """Counts total files, completely ignoring hidden/system files."""
     count = 0
-    for root, _, files in os.walk(directory):
+    for root, dirs, files in os.walk(directory):
+        # Prevent os.walk from even entering hidden directories
+        dirs[:] = [d for d in dirs if not is_ignored(d)]
+        # Only count non-ignored files
+        files = [f for f in files if not is_ignored(f)]
         count += len(files)
     return count
 
 def get_dir_size(directory):
-    """Calculates the total size of a directory in bytes."""
+    """Calculates total size, completely ignoring hidden/system files."""
     total_size = 0
     try:
-        for root, _, files in os.walk(directory):
+        for root, dirs, files in os.walk(directory):
+            dirs[:] = [d for d in dirs if not is_ignored(d)]
             for f in files:
+                if is_ignored(f):
+                    continue
                 fp = Path(root) / f
                 if not fp.is_symlink():
                     try:
                         total_size += fp.stat().st_size
                     except OSError:
-                        pass # Ignore files that disappear or restrict access during scan
+                        pass
     except OSError:
         pass
     return total_size
@@ -60,7 +67,7 @@ def format_size(size_in_bytes):
     return f"{size_in_bytes:.2f} PB"
 
 def copy_with_progress(src_dir, dst_dir, desc="Copying", rename_on_collision=False):
-    """Copies files recursively while updating a progress bar."""
+    """Copies files recursively, skipping hidden and system files."""
     src_dir = Path(src_dir)
     dst_dir = Path(dst_dir)
     
@@ -73,42 +80,43 @@ def copy_with_progress(src_dir, dst_dir, desc="Copying", rename_on_collision=Fal
 
     with tqdm(total_files=total_files, desc=desc, unit="file", leave=True) as pbar:
         for root, dirs, files in os.walk(src_dir):
+            # Prevent entering hidden directories
+            dirs[:] = [d for d in dirs if not is_ignored(d)]
+            
             rel_path = Path(root).relative_to(src_dir)
             target_dir = dst_dir / rel_path
             target_dir.mkdir(parents=True, exist_ok=True)
             
             for file in files:
+                if is_ignored(file):
+                    continue # Skip the hidden/system file completely
+                    
                 src_file = Path(root) / file
                 dst_file = target_dir / file
                 
                 try:
                     if rename_on_collision:
-                        # Smart Resume Check: Look for a match among original AND renamed files
                         current_check = dst_file
                         counter = 1
                         already_restored = False
                         
                         while current_check.exists():
-                            # If exact match in size and time, it's already restored
                             if os.path.getsize(src_file) == os.path.getsize(current_check) and \
                                os.path.getmtime(src_file) == os.path.getmtime(current_check):
                                 already_restored = True
                                 break
                             
-                            # Otherwise, check the next numbered filename
                             current_check = target_dir / f"{dst_file.stem}_{counter}{dst_file.suffix}"
                             counter += 1
                             
                         if already_restored:
                             pbar.update(1)
-                            continue # Skip copying, move to the next file
+                            continue 
                             
-                        # If no match was found, use the next available unique filename
                         dst_file = current_check
                         shutil.copy2(src_file, dst_file)
                         
                     else:
-                        # Backup logic: Only copy if new or modified
                         if not dst_file.exists() or os.path.getmtime(src_file) > os.path.getmtime(dst_file):
                             shutil.copy2(src_file, dst_file)
                             
