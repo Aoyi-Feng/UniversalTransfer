@@ -1,16 +1,16 @@
 # UniversalTransfer
 
-A smart, cross-platform Python utility designed to seamlessly back up, restore, and migrate user profiles between macOS and Linux. UniversalTransfer intelligently handles OS-specific directory naming conventions, filters out system clutter, and protects your data integrity with automated validation checks.
+A cross-platform Python utility for backing up, restoring, and migrating user profiles between macOS and Linux. It handles OS-specific directory naming, filters system files, and uses a snapshot system for versioned backups.
 
-## ✨ Features
+## Features
 
-* **Cross-Platform Routing:** Automatically translates directory paths between macOS and Linux (e.g., safely mapping macOS `Movies` to Linux `Videos`).
-* **Multi-User Migration:** Isolates backups by username, allowing you to back up multiple computers to a single drive and interactively select which profile to restore.
-* **Incremental & Resumable:** Saves time by only copying new or modified files. If a transfer is interrupted, it safely resumes exactly where it left off.
-* **Non-Destructive Restores:** Protects local data by appending a counter (e.g., `file_1.txt`) if a naming collision occurs, ensuring existing files are never overwritten.
-* **Pre-Flight Space Checks:** Calculates backup size and verifies available destination disk space before initiating transfers.
-* **Clutter Filtering:** Automatically ignores hidden system files (`.DS_Store`, `.config`) and junk files (`thumbs.db`) to speed up transfers and save disk space.
-* **Integrity Validation:** Generates timestamped reports and actively hides corrupted or interrupted backups from the restore menu.
+* **Cross-Platform Mapping:** Translates directory paths between macOS and Linux (e.g., macOS `Movies` to Linux `Videos`).
+* **Multi-User Support:** Isolates backups into specific `/[username]/` folders to allow multiple profiles on a single drive.
+* **Incremental Snapshots:** Uses a `.utlink` text pointer system. Unchanged files generate a 1KB pointer to older backups instead of duplicating data.
+* **Native Pointer Resolution:** Reads `.utlink` files via CLI and opens the original file using the OS default application.
+* **Collision Protection:** Appends a counter (e.g., `file_1.txt`) during restore if a local file exists with the same name but different metadata.
+* **System Filtering:** Ignores hidden files and specific system junk (`.DS_Store`, `thumbs.db`).
+* **Validation:** Generates reports and requires a `[BACKUP COMPLETED SUCCESSFULLY]` tag to allow a folder to be restored.
 
 ---
 
@@ -35,10 +35,3 @@ A smart, cross-platform Python utility designed to seamlessly back up, restore, 
             └── Pictures/
                 └── photo.jpg.utlink                <-- TEXT POINTER! (1 KB)
 
-
-## 🚀 Installation
-
-1. Clone the repository to your local machine:
-   ```bash
-   git clone [https://github.com/Aoyi-Feng/UniversalTransfer.git](https://github.com/Aoyi-Feng/UniversalTransfer.git)
-   cd UniversalTransfer

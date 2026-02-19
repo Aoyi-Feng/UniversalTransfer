@@ -381,4 +381,17 @@ def main():
         print("Invalid selection.")
 
 if __name__ == "__main__":
-    main()
+    # Check if a file was passed as an argument (e.g., via CLI or double-click)
+    if len(sys.argv) > 1:
+        arg = sys.argv[1]
+        if arg.endswith('.utlink'):
+            # Import your new file and pass the path to it!
+            import utlink_open
+            utlink_open.open_utlink(arg)
+        else:
+            print(f"Unknown argument or invalid file type: {arg}")
+            print("Usage for opening pointers: python3 main.py /path/to/file.utlink")
+            print("Usage for main menu:        python3 main.py")
+    else:
+        # If no arguments are passed, launch the standard interactive menu
+        main()
