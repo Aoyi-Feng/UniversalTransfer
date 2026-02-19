@@ -16,20 +16,24 @@ A smart, cross-platform Python utility designed to seamlessly back up, restore, 
 
 ## Directory Structure Example
     /Selected_Destination_Path/
-    └── /Your_Username/                         <-- 1. Auto-generated profile folder
-        ├── backup_report_20260219_105933.txt   <-- 2. Live text log
-        ├── Desktop/                            <-- 3. Category folders
-        │   └── current_project.docx
-        ├── Documents/
-        │   ├── Finances/                       <-- 4. Inner contents preserved
-        │   │   └── taxes_2025.xlsx
-        │   └── resume.pdf
-        ├── Downloads/
-        ├── Music/
-        ├── Pictures/
-        ├── Videos/                             <-- 5. OS-standardized (e.g., macOS 'Movies')
-        │   └── home_video.mp4
-        └── user/                               <-- 6. Loose files from your home folder
+    └── /Your_Username/
+        │
+        ├── /2026-02-18_10-00-00/                   <-- Initial Full Backup (Snapshot 1)
+        │   ├── backup_report_20260218_100000.txt
+        │   ├── Documents/
+        │   │   ├── resume.pdf                      <-- Real, physical file (5 MB)
+        │   │   └── finances.xlsx                   <-- Real, physical file (2 MB)
+        │   └── Pictures/
+        │       └── photo.jpg                       <-- Real, physical file (3 MB)
+        │
+        └── /2026-02-19_15-30-00/                   <-- Incremental Backup (Snapshot 2)
+            ├── backup_report_20260219_153000.txt
+            ├── Documents/
+            │   ├── resume.pdf.utlink               <-- TEXT POINTER! (1 KB)
+            │   ├── finances.xlsx.utlink            <-- TEXT POINTER! (1 KB)
+            │   └── new_project.docx                <-- Real, newly created file (1 MB)
+            └── Pictures/
+                └── photo.jpg.utlink                <-- TEXT POINTER! (1 KB)
 
 
 ## 🚀 Installation
