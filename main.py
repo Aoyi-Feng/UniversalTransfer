@@ -186,16 +186,22 @@ def backup(dest_input):
     file_timestamp = current_time.strftime("%Y%m%d_%H%M%S")
     report_path = dest_base / f"backup_report_{file_timestamp}.txt"
     
+    # Grab detailed system information
+    system_name = platform.node()
+    os_type = f"{platform.system()} {platform.release()}"
+    
     with open(report_path, "w") as report:
         report.write("=== CROSS-PLATFORM BACKUP REPORT ===\n")
-        report.write(f"Date/Time : {timestamp_str}\n")
-        report.write(f"User      : {username}\n")
-        report.write(f"Source OS : {platform.system()}\n")
-        report.write(f"Target Dir: {dest_base}\n")
+        report.write(f"Date/Time   : {timestamp_str}\n")
+        report.write(f"User        : {username}\n")
+        report.write(f"System Name : {system_name}\n")
+        report.write(f"Source OS   : {os_type}\n")
+        report.write(f"Target Dir  : {dest_base}\n")
         report.write("-" * 50 + "\n")
         report.write(f"{'Category':<15} | {'Size':<12} | {'Status'}\n")
         report.write("-" * 50 + "\n")
         
+        # Backup standard folders
         for cat, src_path in paths.items():
             if src_path.exists():
                 size = folder_sizes[cat]
