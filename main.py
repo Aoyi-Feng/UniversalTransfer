@@ -82,7 +82,7 @@ def copy_with_progress(src_dir, dst_dir, desc="Copying", rename_on_collision=Fal
     total_files = count_files(src_dir, recursive)
     if total_files == 0: return
 
-    with tqdm(total_files=total_files, desc=desc, unit="file", leave=True) as pbar:
+    with tqdm(total=total_files, desc=desc, unit="file", leave=True) as pbar:
         for root, dirs, files in os.walk(src_dir):
             if not recursive:
                 dirs[:] = []
